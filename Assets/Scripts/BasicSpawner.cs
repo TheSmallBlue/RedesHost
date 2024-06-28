@@ -7,10 +7,31 @@ using System;
 
 public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
 {
+    [SerializeField] NetworkPrefabRef _playerPrefab;
+    [SerializeField] Dictionary<PlayerRef, NetworkObject> _players = new Dictionary<PlayerRef, NetworkObject>();
+
     NetworkRunner _runner;
 
-    public void OnPlayerJoined(NetworkRunner runner, PlayerRef player) { }
-    public void OnPlayerLeft(NetworkRunner runner, PlayerRef player) { }
+    public void OnPlayerJoined(NetworkRunner runner, PlayerRef player) 
+    { 
+        if(runner.IsServer)
+        {
+            // TODO: Spawnpoints
+            NetworkObject newPlayer = runner.Spawn(_playerPrefab, Vector3.zero + Vector3.up, Quaternion.identity, player);
+            Camera.main.transform.root.GetComponent<CameraController>().SetTarget(newPlayer.transform).enabled = true;
+            _players.Add(player, newPlayer);
+        }
+    }
+
+    public void OnPlayerLeft(NetworkRunner runner, PlayerRef player) 
+    { 
+        if(_players.TryGetValue(player, out NetworkObject playerToDespawn))
+        {
+            runner.Despawn(playerToDespawn);
+            _players.Remove(player);
+        }
+    }
+
     public void OnInput(NetworkRunner runner, NetworkInput input) { }
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
