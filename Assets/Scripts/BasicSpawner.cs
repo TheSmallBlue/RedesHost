@@ -13,7 +13,11 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
     public static BasicSpawner instance;
 
     [SerializeField] NetworkPrefabRef _playerPrefab;
-    [SerializeField] Dictionary<PlayerRef, NetworkObject> _players = new Dictionary<PlayerRef, NetworkObject>();
+    [SerializeField] Dictionary<PlayerRef, NetworkObject> _playerObjects = new Dictionary<PlayerRef, NetworkObject>();
+    [SerializeField] List<PlayerRef> _players;
+
+
+    bool roundStarted = false;
 
     NetworkRunner _runner;
 
@@ -26,18 +30,38 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
     { 
         if(!runner.IsServer) return;
 
-        // TODO: Spawnpoints
-        NetworkObject newPlayer = runner.Spawn(_playerPrefab, Vector3.zero + Vector3.up, Quaternion.identity, player);
-        _players.Add(player, newPlayer);
+        _players.Add(player);
+
+        if(roundStarted) _playerObjects.Add(player, SpawnPlayer(player));
+        else
+        {
+            if (_players.Count >= 2) StartRound();
+        }
     }
 
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player) 
     { 
-        if(_players.TryGetValue(player, out NetworkObject playerToDespawn))
+        if(_playerObjects.TryGetValue(player, out NetworkObject playerToDespawn))
         {
             runner.Despawn(playerToDespawn);
-            _players.Remove(player);
+            _playerObjects.Remove(player);
         }
+    }
+
+    void StartRound()
+    {
+        foreach (var player in _players)
+        {
+            _playerObjects[player] = SpawnPlayer(player);
+        }
+
+        roundStarted = true;
+    }
+
+    NetworkObject SpawnPlayer(PlayerRef playerToSpawn)
+    {
+        // TODO: Spawn spoints
+        return _runner.Spawn(_playerPrefab, Vector3.zero + Vector3.up, Quaternion.identity, playerToSpawn);
     }
 
     Queue<Tuple<PlayerRef, float>> playersToRespawn = new Queue<Tuple<PlayerRef, float>>();
@@ -64,7 +88,7 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
         {
             PlayerRef player = playersToRespawn.Dequeue().Item1;
             NetworkObject newPlayer = _runner.Spawn(_playerPrefab, Vector3.zero + Vector3.up, Quaternion.identity, player);
-            _players[player] = newPlayer;
+            _playerObjects[player] = newPlayer;
         }
     }
 
