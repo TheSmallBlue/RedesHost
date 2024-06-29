@@ -32,7 +32,10 @@ public class CameraController : MonoBehaviour
         SetRotation();
     }
 
-    private void LateUpdate() {
+    private void LateUpdate() 
+    {
+        if(_target == null) return;
+        
         SetPosition();
     }
 

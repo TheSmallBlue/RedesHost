@@ -15,5 +15,6 @@ public enum PlayerButtons
 {
     Jump,
     Crouch,
-    Dash
+    Dash,
+    Attack
 }
