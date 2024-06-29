@@ -18,7 +18,6 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
         {
             // TODO: Spawnpoints
             NetworkObject newPlayer = runner.Spawn(_playerPrefab, Vector3.zero + Vector3.up, Quaternion.identity, player);
-            Camera.main.transform.root.GetComponent<CameraController>().SetTarget(newPlayer.transform).enabled = true;
             _players.Add(player, newPlayer);
         }
     }
@@ -32,7 +31,21 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
         }
     }
 
-    public void OnInput(NetworkRunner runner, NetworkInput input) { }
+    public void OnInput(NetworkRunner runner, NetworkInput input) 
+    { 
+        var data = new NetworkInputData();
+
+        data.direction = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+
+        data.cameraForward = Camera.main.transform.forward;
+        data.cameraRight = Camera.main.transform.right;
+
+        data.buttons.Set(PlayerButtons.Jump, Input.GetKey(KeyCode.Space));
+        data.buttons.Set(PlayerButtons.Crouch, Input.GetKey(KeyCode.LeftControl));
+        data.buttons.Set(PlayerButtons.Dash, Input.GetKey(KeyCode.LeftShift));
+
+        input.Set(data);
+    }
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
     public void OnConnectedToServer(NetworkRunner runner) { }

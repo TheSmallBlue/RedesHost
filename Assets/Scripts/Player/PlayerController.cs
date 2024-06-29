@@ -1,48 +1,57 @@
 using System.Collections;
 using System.Collections.Generic;
 using Fusion;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerController : NetworkBehaviour
 {
     [SerializeField] float _topSpeed, _acceleration, _decceleration;
 
-    [SerializeField] float _jumpForce;
-
-    Vector2 _input;
+    [SerializeField] float _jumpForce, _groundpoundForce, _dashForce;
 
     Rigidbody _rb;
+    GroundedCheck _grounded;
+
+    [Networked] public NetworkButtons ButtonsPrevious { get; set; }
 
     private void Awake() 
     {
         _rb = GetComponent<Rigidbody>();
+        _grounded = GetComponent<GroundedCheck>();
     }
 
-    private void Update() 
+    private void Start() 
     {
-        _input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-
-        if(/* isGrounded && */ Input.GetButtonDown("Jump"))
+        if(HasInputAuthority)
         {
-            _rb.velocity = new Vector3(_rb.velocity.x, _jumpForce, _rb.velocity.z);
-        }
-
-        if(Input.GetButtonUp("Jump") && _rb.velocity.y > 0f)
-        {
-            _rb.velocity = new Vector3(_rb.velocity.x, _rb.velocity.y * 0.5f, _rb.velocity.z);
+            Camera.main.transform.root.GetComponent<CameraController>().SetTarget(transform).enabled = true;
         }
     }
 
     public override void FixedUpdateNetwork() 
     {
-        Move(UpdateForward());
+        if(!GetInput(out NetworkInputData inputData)) return;
+
+        var pressedButtons = inputData.buttons.GetPressed(ButtonsPrevious);
+        var releasedButtons = inputData.buttons.GetReleased(ButtonsPrevious);
+
+        if(pressedButtons.IsSet(PlayerButtons.Jump)) Jump(inputData);
+        if(pressedButtons.IsSet(PlayerButtons.Crouch)) Crouch(inputData);
+        if(pressedButtons.IsSet(PlayerButtons.Dash)) Dash(inputData);
+
+        if (releasedButtons.IsSet(PlayerButtons.Jump)) UnJump(inputData);
+
+        ButtonsPrevious = inputData.buttons;
+
+        Move(UpdateForward(inputData));
     }
 
-    Vector3 UpdateForward()
+    Vector3 UpdateForward(NetworkInputData input)
     {
-        if(_input.magnitude == 0) return default;
+        if(input.direction.magnitude == 0) return default;
 
-        Vector3 inputForward = Camera.main.transform.forward.CollapseAxis(1) * _input.y + Camera.main.transform.right.CollapseAxis(1) * _input.x;
+        Vector3 inputForward = input.cameraForward.CollapseAxis(1) * input.direction.y + input.cameraRight.CollapseAxis(1) * input.direction.x;
         inputForward.Normalize();
 
         transform.forward = inputForward;
@@ -55,5 +64,34 @@ public class PlayerController : NetworkBehaviour
         float acc = direction.magnitude > 0.01f ? _acceleration : _decceleration;
 
         _rb.AddForce(velocityDif * acc);
+    }
+
+    void Jump(NetworkInputData input)
+    {
+        if(!_grounded.isGrounded) return;
+
+        _rb.velocity = new Vector3(_rb.velocity.x, _jumpForce, _rb.velocity.z);
+    }
+
+    void UnJump(NetworkInputData input)
+    {   
+        if (_rb.velocity.y < 0f) return;
+
+        _rb.velocity = new Vector3(_rb.velocity.x, _rb.velocity.y * 0.5f, _rb.velocity.z);
+    }
+
+    void Crouch(NetworkInputData input)
+    {
+        if(!_grounded.isGrounded)
+        {
+            _rb.velocity = -transform.up * _groundpoundForce;
+        }
+    }
+
+    void Dash(NetworkInputData input)
+    {
+        Vector3 newVel = UpdateForward(input) * _dashForce;
+        newVel.y = _rb.velocity.y;
+        _rb.velocity = newVel;
     }
 }

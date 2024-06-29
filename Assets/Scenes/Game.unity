@@ -218,8 +218,8 @@ MonoBehaviour:
   _yRotationLimits: {x: -90, y: 90}
   _sensitivity: 500
   _distance: 10
-  _yDampening: 10
-  _xzDampening: 3
+  _yDampening: 20
+  _xzDampening: 10
   _flipXAxis: 0
   _flipYAxis: 0
 --- !u!1 &1722378739

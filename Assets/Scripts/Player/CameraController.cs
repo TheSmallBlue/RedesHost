@@ -29,36 +29,10 @@ public class CameraController : MonoBehaviour
     {
         _input = new Vector2(Input.GetAxisRaw("Mouse X") * (_flipXAxis ? -1 : 1), Input.GetAxisRaw("Mouse Y") * (_flipYAxis ? -1 : 1));
 
-        /*
-        if(Input.GetButtonDown("CamReset"))
-        {
-            StartCoroutine(ResetCamera(0.2f));
-        }
-        */
-
         SetRotation();
     }
 
-    IEnumerator ResetCamera(float length)
-    {
-        Vector2 from = _movement;
-        Vector2 to = new Vector2(_target.eulerAngles.y, _movement.y);
-
-        float time = 0;
-
-        while (time < length)
-        {
-            time += Time.deltaTime;
-
-            _movement = Vector2.Lerp(from, to, Mathf.SmoothStep(0f, 1f, time/length));
-
-            transform.rotation = Quaternion.Euler(-_movement.y, _movement.x, 0);
-
-            yield return null;   
-        }
-    }
-
-    private void FixedUpdate() {
+    private void LateUpdate() {
         SetPosition();
     }
 
