@@ -18,6 +18,7 @@ public class PlayerController : NetworkBehaviour, IAttackable
 
     Rigidbody _rb;
     GroundedCheck _grounded;
+    Animator _anim;
 
     [Networked] public NetworkButtons ButtonsPrevious { get; set; }
     [Networked] private TickTimer stunTimer { get; set; }
@@ -26,6 +27,7 @@ public class PlayerController : NetworkBehaviour, IAttackable
     {
         _rb = GetComponent<Rigidbody>();
         _grounded = GetComponent<GroundedCheck>();
+        _anim = GetComponentInChildren<Animator>();
     }
 
     private void Start() 
@@ -34,6 +36,14 @@ public class PlayerController : NetworkBehaviour, IAttackable
         {
             Camera.main.transform.root.GetComponent<CameraController>().SetTarget(transform).enabled = true;
         }
+    }
+
+    private void Update() 
+    {
+        _anim.SetFloat("Speed", _rb.velocity.CollapseAxis(1).magnitude);
+
+        _anim.SetBool("Grounded", _grounded.isGrounded);
+        _anim.SetBool("Falling", _rb.velocity.y < -0.1f);
     }
 
     public override void FixedUpdateNetwork() 
@@ -52,6 +62,8 @@ public class PlayerController : NetworkBehaviour, IAttackable
         if(releasedButtons.IsSet(PlayerButtons.Jump)) UnJump(inputData);
 
         ButtonsPrevious = inputData.buttons;
+
+        _anim.SetBool("Crouching", inputData.buttons.IsSet(PlayerButtons.Crouch));
 
         Vector3 fwd = GetForward(inputData);
 
@@ -89,6 +101,8 @@ public class PlayerController : NetworkBehaviour, IAttackable
         if(!_grounded.isGrounded) return;
 
         _rb.velocity = new Vector3(_rb.velocity.x, input.buttons.IsSet(PlayerButtons.Crouch) ? _jumpForce * 1.5f : _jumpForce, _rb.velocity.z);
+
+        _anim.SetTrigger("Jump");
     }
 
     void UnJump(NetworkInputData input)
@@ -103,6 +117,7 @@ public class PlayerController : NetworkBehaviour, IAttackable
         if(!_grounded.isGrounded)
         {
             _rb.velocity = -transform.up * _groundpoundForce;
+            _anim.SetTrigger("Groundpound");
         }
     }
 
@@ -167,6 +182,8 @@ public class PlayerController : NetworkBehaviour, IAttackable
         {
             var headAsPlayer = head.GetComponent<PlayerController>();
             if (head.GetComponent<PlayerController>() == this) continue;
+
+            _rb.velocity = new Vector3(_rb.velocity.x, _jumpForce, _rb.velocity.z);
 
             headAsPlayer.Die();
         }
