@@ -13,8 +13,7 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
     public static BasicSpawner instance;
 
     [SerializeField] NetworkPrefabRef _playerPrefab;
-    [SerializeField] Dictionary<PlayerRef, NetworkObject> _playerObjects = new Dictionary<PlayerRef, NetworkObject>();
-    [SerializeField] List<PlayerRef> _players;
+    [SerializeField] public Dictionary<PlayerRef, PlayerData> playerObjects = new Dictionary<PlayerRef, PlayerData>();
 
 
     bool roundStarted = false;
@@ -30,29 +29,32 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
     { 
         if(!runner.IsServer) return;
 
-        _players.Add(player);
-
-        if(roundStarted) _playerObjects.Add(player, SpawnPlayer(player));
-        else
+        var newPlayerData = new PlayerData()
         {
-            if (_players.Count >= 2) StartRound();
-        }
+            name = NameGenerator.GetName(),
+            color = UnityEngine.Random.ColorHSV()
+        };
+
+        playerObjects.Add(player, newPlayerData);
+
+        if (roundStarted) playerObjects[player].ownedObject = SpawnPlayer(player);
+        else if (playerObjects.Count >= 2) StartRound();
     }
 
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player) 
     { 
-        if(_playerObjects.TryGetValue(player, out NetworkObject playerToDespawn))
+        if(playerObjects.TryGetValue(player, out PlayerData playerToDespawn))
         {
-            runner.Despawn(playerToDespawn);
-            _playerObjects.Remove(player);
+            runner.Despawn(playerToDespawn.ownedObject);
+            playerObjects.Remove(player);
         }
     }
 
     void StartRound()
     {
-        foreach (var player in _players)
+        foreach (var player in playerObjects)
         {
-            _playerObjects[player] = SpawnPlayer(player);
+            playerObjects[player.Key].ownedObject = SpawnPlayer(player.Key);
         }
 
         roundStarted = true;
@@ -61,7 +63,11 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
     NetworkObject SpawnPlayer(PlayerRef playerToSpawn)
     {
         // TODO: Spawn spoints
-        return _runner.Spawn(_playerPrefab, Vector3.zero + Vector3.up, Quaternion.identity, playerToSpawn);
+
+        var playerNetworkObject = _runner.Spawn(_playerPrefab, Vector3.zero + Vector3.up, Quaternion.identity, playerToSpawn);
+        var playerData = playerObjects[playerToSpawn];
+
+        return playerNetworkObject;
     }
 
     Queue<Tuple<PlayerRef, float>> playersToRespawn = new Queue<Tuple<PlayerRef, float>>();
@@ -88,7 +94,7 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
         {
             PlayerRef player = playersToRespawn.Dequeue().Item1;
             NetworkObject newPlayer = _runner.Spawn(_playerPrefab, Vector3.zero + Vector3.up, Quaternion.identity, player);
-            _playerObjects[player] = newPlayer;
+            playerObjects[player].ownedObject = newPlayer;
         }
     }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Fusion;
 using Fusion.Addons.Physics;
+using TMPro;
 using UnityEngine;
 
 public class PlayerController : NetworkBehaviour, IAttackable
