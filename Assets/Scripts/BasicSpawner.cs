@@ -96,9 +96,11 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
     {
         playerObjects[sourcePlayer].score += amount;
 
-        if(playerObjects[sourcePlayer].score >= amountOfPointsToWin)
+        if (playerObjects[sourcePlayer].score >= amountOfPointsToWin)
         {
             roundState = RoundState.Ended;
+            
+            playerObjects[sourcePlayer].ownedObject.GetComponent<PlayerController>().RPC_ShowWinUI(sourcePlayer);
         }
     }
 

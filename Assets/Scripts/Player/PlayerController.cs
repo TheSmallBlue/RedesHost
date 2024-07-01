@@ -52,12 +52,17 @@ public class PlayerController : NetworkBehaviour, IAttackable
 
     public override void Render()
     {
+        if(!visualsSetUp) SetupVisuals(visuals);
+    }
+
+    private void Update() 
+    {
+        if(!HasInputAuthority) return;
+        
         _anim.SetFloat("Speed", _rb.velocity.CollapseAxis(1).magnitude);
 
         _anim.SetBool("Grounded", _grounded.isGrounded);
         _anim.SetBool("Falling", _rb.velocity.y < -0.1f);
-
-        if(!visualsSetUp) SetupVisuals(visuals);
     }
 
     void SetupVisuals(PlayerData.PlayerVisuals newVisuals)
@@ -91,7 +96,8 @@ public class PlayerController : NetworkBehaviour, IAttackable
 
         ButtonsPrevious = inputData.buttons;
 
-        _anim.SetBool("Crouching", inputData.buttons.IsSet(PlayerButtons.Crouch));
+        RPC_SetAnim(PlayerButtons.Crouch, inputData.buttons.IsSet(PlayerButtons.Crouch));
+        RPC_SetAnim(PlayerButtons.Jump, inputData.buttons.IsSet(PlayerButtons.Jump));
 
         Vector3 fwd = GetForward(inputData);
 
@@ -129,8 +135,6 @@ public class PlayerController : NetworkBehaviour, IAttackable
         if(!_grounded.isGrounded) return;
 
         _rb.velocity = new Vector3(_rb.velocity.x, input.buttons.IsSet(PlayerButtons.Crouch) ? _jumpForce * 1.5f : _jumpForce, _rb.velocity.z);
-
-        _anim.SetTrigger("Jump");
     }
 
     void UnJump(NetworkInputData input)
@@ -145,7 +149,6 @@ public class PlayerController : NetworkBehaviour, IAttackable
         if(!_grounded.isGrounded)
         {
             _rb.velocity = -transform.up * _groundpoundForce;
-            _anim.SetTrigger("Groundpound");
         }
     }
 
@@ -224,5 +227,25 @@ public class PlayerController : NetworkBehaviour, IAttackable
         BasicSpawner.instance.RespawnIn(Object.InputAuthority, 5f);
         
         Runner.Despawn(Object);
+    }
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.InputAuthority, HostMode = RpcHostMode.SourceIsServer)]
+    public void RPC_ShowWinUI(PlayerRef winningPlayer)
+    {
+        GameUI.instance.ShowRoundEnd(winningPlayer == Object.InputAuthority);
+    }
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All, HostMode = RpcHostMode.SourceIsServer)]
+    public void RPC_SetAnim(PlayerButtons action, bool value)
+    {
+        switch (action)
+        {
+            case PlayerButtons.Jump:
+                _anim.SetBool("Jumping", value);
+                break;
+            case PlayerButtons.Crouch:
+                _anim.SetBool("Crouching", value);
+                break;
+        }
     }
 }
