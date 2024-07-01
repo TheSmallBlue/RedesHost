@@ -690,6 +690,7 @@ MonoBehaviour:
   - {fileID: 968777936}
   - {fileID: 2103159296}
   - {fileID: 1862869783}
+  amountOfPointsToWin: 5
 --- !u!4 &220079189
 Transform:
   m_ObjectHideFlags: 0

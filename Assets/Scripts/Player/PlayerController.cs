@@ -75,6 +75,7 @@ public class PlayerController : NetworkBehaviour, IAttackable
 
     public override void FixedUpdateNetwork() 
     {
+        if (BasicSpawner.instance.roundState != BasicSpawner.RoundState.Started) return;
         if (!stunTimer.ExpiredOrNotRunning(Runner)) return;
         if (!GetInput(out NetworkInputData inputData)) return;
 
@@ -209,6 +210,8 @@ public class PlayerController : NetworkBehaviour, IAttackable
         {
             var headAsPlayer = head.GetComponent<PlayerController>();
             if (head.GetComponent<PlayerController>() == this) continue;
+
+            BasicSpawner.instance.AddPoints(Object.InputAuthority, 1);
 
             _rb.velocity = new Vector3(_rb.velocity.x, _jumpForce, _rb.velocity.z);
 

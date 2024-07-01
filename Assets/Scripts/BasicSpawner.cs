@@ -16,9 +16,16 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
     [SerializeField] public Dictionary<PlayerRef, PlayerData> playerObjects = new Dictionary<PlayerRef, PlayerData>();
 
     [SerializeField] Transform[] spawnPoints;
+    [SerializeField] int amountOfPointsToWin;
 
+    [Networked] public RoundState roundState {get; set;}
 
-    bool roundStarted = false;
+    public enum RoundState
+    {
+        NotStarted,
+        Started,
+        Ended
+    }
 
     NetworkRunner _runner;
 
@@ -44,7 +51,7 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
 
         playerObjects.Add(player, newPlayerData);
 
-        if (roundStarted) playerObjects[player].ownedObject = SpawnPlayer(player);
+        if (roundState == RoundState.Started) playerObjects[player].ownedObject = SpawnPlayer(player);
         else if (playerObjects.Count >= 2) StartRound();
     }
 
@@ -59,12 +66,12 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
 
     void StartRound()
     {
+        roundState = RoundState.Started;
+
         foreach (var player in playerObjects)
         {
             playerObjects[player.Key].ownedObject = SpawnPlayer(player.Key);
         }
-
-        roundStarted = true;
     }
 
     NetworkObject SpawnPlayer(PlayerRef playerToSpawn)
@@ -85,6 +92,16 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
 
     }
 
+    public void AddPoints(PlayerRef sourcePlayer, int amount)
+    {
+        playerObjects[sourcePlayer].score += amount;
+
+        if(playerObjects[sourcePlayer].score >= amountOfPointsToWin)
+        {
+            roundState = RoundState.Ended;
+        }
+    }
+
     bool _jump, _dash, _crouch, _attack;
 
     private void Update() 
@@ -99,6 +116,9 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
         if(playersToRespawn.TryPeek(out var playerRespawn) && Time.time > playerRespawn.Item2)
         {
             PlayerRef player = playersToRespawn.Dequeue().Item1;
+
+            if(!playerObjects.ContainsKey(player)) return;
+
             NetworkObject newPlayer = SpawnPlayer(player);
             playerObjects[player].ownedObject = newPlayer;
         }
