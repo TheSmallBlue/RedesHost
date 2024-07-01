@@ -3,9 +3,15 @@ using System.Collections.Generic;
 using Fusion;
 using UnityEngine;
 
-public class PlayerData 
+public class PlayerData
 {
-    public string name;
     public NetworkObject ownedObject;
-    public Color color;
+    public int score = 0;
+    public PlayerVisuals visuals;
+
+    public struct PlayerVisuals : INetworkStruct
+    {
+        public NetworkString<_16> name;
+        public Color color;
+    }
 }

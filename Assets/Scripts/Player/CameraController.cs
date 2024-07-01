@@ -20,7 +20,7 @@ public class CameraController : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
 
         transform.position = _target.position;
-        Camera.main.transform.position = _target.position - _target.forward * _distance;
+
 
         _movement = transform.localRotation.eulerAngles;
     }
@@ -68,6 +68,8 @@ public class CameraController : MonoBehaviour
     public CameraController SetTarget(Transform newTarget)
     {
         _target = newTarget;
+
+        transform.position = _target.position;
 
         return this;
     }

@@ -24,6 +24,9 @@ public class PlayerController : NetworkBehaviour, IAttackable
     [Networked] public NetworkButtons ButtonsPrevious { get; set; }
     [Networked] private TickTimer stunTimer { get; set; }
 
+    [Networked] public PlayerData.PlayerVisuals visuals { get; set; }
+    bool visualsSetUp = false;
+
     private void Awake() 
     {
         _rb = GetComponent<Rigidbody>();
@@ -39,12 +42,35 @@ public class PlayerController : NetworkBehaviour, IAttackable
         }
     }
 
-    private void Update() 
+    public override void Spawned()
+    {
+        if(!HasStateAuthority) return;
+
+        var futureVisuals = BasicSpawner.instance.playerObjects[Object.InputAuthority].visuals;
+        visuals = futureVisuals;
+    }
+
+    public override void Render()
     {
         _anim.SetFloat("Speed", _rb.velocity.CollapseAxis(1).magnitude);
 
         _anim.SetBool("Grounded", _grounded.isGrounded);
         _anim.SetBool("Falling", _rb.velocity.y < -0.1f);
+
+        if(!visualsSetUp) SetupVisuals(visuals);
+    }
+
+    void SetupVisuals(PlayerData.PlayerVisuals newVisuals)
+    {
+        GetComponentInChildren<SkinnedMeshRenderer>().materials[1].color = newVisuals.color;
+
+        var textMesh = GetComponentInChildren<TextMeshPro>();
+
+        string name = newVisuals.name.ToString();
+        textMesh.text = name[0].ToString().ToUpper();
+        textMesh.color = newVisuals.color;
+
+        visualsSetUp = true;
     }
 
     public override void FixedUpdateNetwork() 

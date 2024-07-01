@@ -15,6 +15,8 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
     [SerializeField] NetworkPrefabRef _playerPrefab;
     [SerializeField] public Dictionary<PlayerRef, PlayerData> playerObjects = new Dictionary<PlayerRef, PlayerData>();
 
+    [SerializeField] Transform[] spawnPoints;
+
 
     bool roundStarted = false;
 
@@ -29,10 +31,15 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
     { 
         if(!runner.IsServer) return;
 
-        var newPlayerData = new PlayerData()
+        var newVisuals = new PlayerData.PlayerVisuals()
         {
             name = NameGenerator.GetName(),
             color = UnityEngine.Random.ColorHSV()
+        };
+
+        var newPlayerData = new PlayerData()
+        {
+            visuals = newVisuals
         };
 
         playerObjects.Add(player, newPlayerData);
@@ -62,10 +69,9 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
 
     NetworkObject SpawnPlayer(PlayerRef playerToSpawn)
     {
-        // TODO: Spawn spoints
+        Transform spawnPoint = spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Length - 1)];
 
-        var playerNetworkObject = _runner.Spawn(_playerPrefab, Vector3.zero + Vector3.up, Quaternion.identity, playerToSpawn);
-        var playerData = playerObjects[playerToSpawn];
+        var playerNetworkObject = _runner.Spawn(_playerPrefab, spawnPoint.position, spawnPoint.rotation, playerToSpawn);
 
         return playerNetworkObject;
     }
@@ -93,7 +99,7 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
         if(playersToRespawn.TryPeek(out var playerRespawn) && Time.time > playerRespawn.Item2)
         {
             PlayerRef player = playersToRespawn.Dequeue().Item1;
-            NetworkObject newPlayer = _runner.Spawn(_playerPrefab, Vector3.zero + Vector3.up, Quaternion.identity, player);
+            NetworkObject newPlayer = SpawnPlayer(player);
             playerObjects[player].ownedObject = newPlayer;
         }
     }
