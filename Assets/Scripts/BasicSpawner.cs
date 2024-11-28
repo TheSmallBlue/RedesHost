@@ -12,7 +12,7 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
 {
     public static BasicSpawner instance;
 
-    [SerializeField] NetworkPrefabRef _playerPrefab;
+    [SerializeField] NetworkPrefabRef _playerHead, _playerPrefab;
     [SerializeField] public Dictionary<PlayerRef, PlayerData> playerObjects = new Dictionary<PlayerRef, PlayerData>();
 
     [SerializeField] Transform[] spawnPoints;
@@ -34,9 +34,40 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
         instance = this;
     }
 
+    async void StartGame(GameMode mode)
+    {
+        // Create the Fusion runner and let it know that we will be providing user input
+        _runner = gameObject.AddComponent<NetworkRunner>();
+        gameObject.AddComponent<RunnerSimulatePhysics3D>();
+        _runner.ProvideInput = true;
+
+        // Create the NetworkSceneInfo from the current scene
+        var scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex);
+        var sceneInfo = new NetworkSceneInfo();
+        if (scene.IsValid)
+        {
+            sceneInfo.AddSceneRef(scene, LoadSceneMode.Additive);
+        }
+
+        // Start or join (depends on gamemode) a session with a specific name
+        await _runner.StartGame(new StartGameArgs()
+        {
+            GameMode = mode,
+            SessionName = "TestRoom",
+            Scene = scene,
+            SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
+        });
+    }
+
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player) 
     { 
         if(!runner.IsServer) return;
+
+        var head = _runner.Spawn(_playerHead).GetComponent<PlayerHead>();
+        head.Color = UnityEngine.Random.ColorHSV();
+        head.Name = NameGenerator.GetName();
+
+        /*
 
         var newVisuals = new PlayerData.PlayerVisuals()
         {
@@ -53,6 +84,7 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
 
         if (roundState == RoundState.Started) playerObjects[player].ownedObject = SpawnPlayer(player);
         else if (playerObjects.Count >= 2) StartRound();
+        */
     }
 
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player) 
@@ -104,6 +136,8 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
         }
     }
 
+    #region Input
+
     bool _jump, _dash, _crouch, _attack;
 
     private void Update() 
@@ -125,6 +159,8 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
             playerObjects[player].ownedObject = newPlayer;
         }
     }
+
+    #endregion
 
     public void OnInput(NetworkRunner runner, NetworkInput input) 
     { 
@@ -165,31 +201,6 @@ public class BasicSpawner : MonoBehaviour, INetworkRunnerCallbacks
     public void OnObjectEnterAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
     public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ReliableKey key, ArraySegment<byte> data) { }
     public void OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress) { }
-
-    async void StartGame(GameMode mode)
-    {
-        // Create the Fusion runner and let it know that we will be providing user input
-        _runner = gameObject.AddComponent<NetworkRunner>();
-        gameObject.AddComponent<RunnerSimulatePhysics3D>();
-        _runner.ProvideInput = true;
-
-        // Create the NetworkSceneInfo from the current scene
-        var scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex);
-        var sceneInfo = new NetworkSceneInfo();
-        if (scene.IsValid)
-        {
-            sceneInfo.AddSceneRef(scene, LoadSceneMode.Additive);
-        }
-
-        // Start or join (depends on gamemode) a session with a specific name
-        await _runner.StartGame(new StartGameArgs()
-        {
-            GameMode = mode,
-            SessionName = "TestRoom",
-            Scene = scene,
-            SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>()
-        });
-    }
 
     private void OnGUI()
     {

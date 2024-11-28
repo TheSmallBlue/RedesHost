@@ -225,7 +225,8 @@ public class PlayerController : NetworkBehaviour, IAttackable
     public void Die()
     {
         BasicSpawner.instance.RespawnIn(Object.InputAuthority, 5f);
-        
+
+        //gameObject.SetActive(false);
         Runner.Despawn(Object);
     }
 

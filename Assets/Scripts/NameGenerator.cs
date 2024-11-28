@@ -9,6 +9,6 @@ public static class NameGenerator
 
     public static string GetName()
     {
-        return letters[Random.Range(0, letters.Length - 1)] + postfixes[Random.Range(0, postfixes.Length - 1)];
+        return letters[Random.Range(0, letters.Length)].ToString().ToUpper() + postfixes[Random.Range(0, postfixes.Length)];
     }
 }

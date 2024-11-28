@@ -680,6 +680,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 920ac5579d88b984b8a382a0d899d45f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _playerHead:
+    RawGuidValue: 1b2bfbb3e55c060469d03d99e6aa70a2
   _playerPrefab:
     RawGuidValue: 1cdba26367acc17488c2313e1cc2dfe4
   spawnPoints:
