@@ -10,10 +10,6 @@ public class PlayerHead : NetworkBehaviour
 
     public override void Spawned()
     {
-        //Debug.Log(HasStateAuthority);
-    }
-
-    private void Update() {
-        Debug.Log(Name);
+        
     }
 }

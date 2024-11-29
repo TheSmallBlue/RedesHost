@@ -46,7 +46,7 @@ public class PlayerController : NetworkBehaviour, IAttackable
     {
         if(!HasStateAuthority) return;
 
-        var futureVisuals = BasicSpawner.instance.playerObjects[Object.InputAuthority].visuals;
+        var futureVisuals = RunnerManager.instance.playerObjects[Object.InputAuthority].visuals;
         visuals = futureVisuals;
     }
 
@@ -80,7 +80,7 @@ public class PlayerController : NetworkBehaviour, IAttackable
 
     public override void FixedUpdateNetwork() 
     {
-        if (BasicSpawner.instance.roundState != BasicSpawner.RoundState.Started) return;
+        if (RunnerManager.instance.roundState != RunnerManager.RoundState.Started) return;
         if (!stunTimer.ExpiredOrNotRunning(Runner)) return;
         if (!GetInput(out NetworkInputData inputData)) return;
 
@@ -214,7 +214,7 @@ public class PlayerController : NetworkBehaviour, IAttackable
             var headAsPlayer = head.GetComponent<PlayerController>();
             if (head.GetComponent<PlayerController>() == this) continue;
 
-            BasicSpawner.instance.AddPoints(Object.InputAuthority, 1);
+            //BasicSpawner.instance.AddPoints(Object.InputAuthority, 1);
 
             _rb.velocity = new Vector3(_rb.velocity.x, _jumpForce, _rb.velocity.z);
 
@@ -224,7 +224,7 @@ public class PlayerController : NetworkBehaviour, IAttackable
 
     public void Die()
     {
-        BasicSpawner.instance.RespawnIn(Object.InputAuthority, 5f);
+        //BasicSpawner.instance.RespawnIn(Object.InputAuthority, 5f);
 
         //gameObject.SetActive(false);
         Runner.Despawn(Object);
