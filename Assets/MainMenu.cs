@@ -58,6 +58,11 @@ public class MainMenu : MonoBehaviour
         StartCoroutine(UpdatePlayerList());
     }
 
+    public void OnRoundStart()
+    {
+        lobbyScreen.SetActive(false);
+    }
+
     public void Disconnect()
     {
         RunnerManager.instance.DisconnectUI();

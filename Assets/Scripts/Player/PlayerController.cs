@@ -10,11 +10,14 @@ public class PlayerController : NetworkBehaviour, IAttackable
 {
     [SerializeField] float _topSpeed, _acceleration, _decceleration;
 
+    [Space]
     [SerializeField] float _jumpForce, _groundpoundForce, _dashForce;
 
+    [Space]
     [SerializeField] float _attackReach, _attackSize;
     [SerializeField] float _knockbackAmount;
 
+    [Space]
     [SerializeField] float _stunTime;
 
     Rigidbody _rb;
@@ -24,9 +27,6 @@ public class PlayerController : NetworkBehaviour, IAttackable
     [Networked] public NetworkButtons ButtonsPrevious { get; set; }
     [Networked] private TickTimer stunTimer { get; set; }
 
-    [Networked] public PlayerData.PlayerVisuals visuals { get; set; }
-    bool visualsSetUp = false;
-
     private void Awake() 
     {
         _rb = GetComponent<Rigidbody>();
@@ -34,25 +34,20 @@ public class PlayerController : NetworkBehaviour, IAttackable
         _anim = GetComponentInChildren<Animator>();
     }
 
-    private void Start() 
-    {
-        if(HasInputAuthority)
-        {
-            Camera.main.transform.root.GetComponent<CameraController>().SetTarget(transform).enabled = true;
-        }
-    }
-
     public override void Spawned()
     {
-        if(!HasStateAuthority) return;
+        var cameraRoot = Camera.main.transform.root;
 
-        var futureVisuals = RunnerManager.instance.playerObjects[Object.InputAuthority].visuals;
-        visuals = futureVisuals;
+        cameraRoot.GetComponent<Animator>().enabled = false;
+        cameraRoot.GetComponent<CameraController>().SetTarget(transform).enabled = true;
     }
 
-    public override void Render()
+    public override void Despawned(NetworkRunner runner, bool hasState)
     {
-        if(!visualsSetUp) SetupVisuals(visuals);
+        var cameraRoot = Camera.main.transform.root;
+
+        cameraRoot.GetComponent<Animator>().enabled = true;
+        cameraRoot.GetComponent<CameraController>().enabled = false;
     }
 
     private void Update() 
@@ -65,17 +60,14 @@ public class PlayerController : NetworkBehaviour, IAttackable
         _anim.SetBool("Falling", _rb.velocity.y < -0.1f);
     }
 
-    void SetupVisuals(PlayerData.PlayerVisuals newVisuals)
+    public void SetupVisuals(string desiredName, Color desiredColor)
     {
-        GetComponentInChildren<SkinnedMeshRenderer>().materials[1].color = newVisuals.color;
+        GetComponentInChildren<SkinnedMeshRenderer>().materials[1].color = desiredColor;
 
         var textMesh = GetComponentInChildren<TextMeshPro>();
 
-        string name = newVisuals.name.ToString();
-        textMesh.text = name[0].ToString().ToUpper();
-        textMesh.color = newVisuals.color;
-
-        visualsSetUp = true;
+        textMesh.text = desiredName[0].ToString().ToUpper();
+        textMesh.color = desiredColor;
     }
 
     public override void FixedUpdateNetwork() 

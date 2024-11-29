@@ -14,10 +14,7 @@ public class RunnerManager : MonoBehaviour, INetworkRunnerCallbacks
 {
     public static RunnerManager instance;
 
-    [SerializeField] NetworkPrefabRef _playerHead, _playerPrefab;
-
-    [Space]
-    [SerializeField] public Dictionary<PlayerRef, PlayerData> playerObjects = new Dictionary<PlayerRef, PlayerData>();
+    [SerializeField] NetworkPrefabRef _playerHead;
 
     [Space]
     public UnityEvent onShutdown;
@@ -87,7 +84,7 @@ public class RunnerManager : MonoBehaviour, INetworkRunnerCallbacks
         {
             var headObject = runner.Spawn(_playerHead);
             var head = headObject.GetComponent<PlayerHead>();
-            head.Color = UnityEngine.Random.ColorHSV();
+            head.Color = UnityEngine.Random.ColorHSV(0f, 1f, 0f, 1f, 0f, 1f, 1f, 1f);
             head.Name = NameGenerator.GetName();
 
             runner.SetPlayerObject(player, headObject);

@@ -15,14 +15,16 @@ public class CameraController : MonoBehaviour
 
     Vector2 _input;
 
-    private void Start() 
+    private void OnEnable() 
     {
         Cursor.lockState = CursorLockMode.Locked;
-
         transform.position = _target.position;
-
-
         _movement = transform.localRotation.eulerAngles;
+    }
+
+    private void OnDisable() 
+    {
+        Cursor.lockState = CursorLockMode.None;
     }
 
     void Update()
