@@ -13,7 +13,7 @@ public class PlayerHead : NetworkBehaviour
 
     public void SpawnAliveAvatar()
     {
-        ControlledObject = Runner.Spawn(alivePlayerPrefab).Object;
+        ControlledObject = Runner.Spawn(alivePlayerPrefab, inputAuthority: Object.InputAuthority).Object;
 
         RPC_ConfigureAvatar();
     }

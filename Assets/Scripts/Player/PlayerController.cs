@@ -42,6 +42,16 @@ public class PlayerController : NetworkBehaviour, IAttackable
         cameraRoot.GetComponent<CameraController>().SetTarget(transform).enabled = true;
     }
 
+    public void SetupVisuals(string desiredName, Color desiredColor)
+    {
+        GetComponentInChildren<SkinnedMeshRenderer>().materials[1].color = desiredColor;
+
+        var textMesh = GetComponentInChildren<TextMeshPro>();
+
+        textMesh.text = desiredName[0].ToString().ToUpper();
+        textMesh.color = desiredColor;
+    }
+
     public override void Despawned(NetworkRunner runner, bool hasState)
     {
         var cameraRoot = Camera.main.transform.root;
@@ -60,19 +70,9 @@ public class PlayerController : NetworkBehaviour, IAttackable
         _anim.SetBool("Falling", _rb.velocity.y < -0.1f);
     }
 
-    public void SetupVisuals(string desiredName, Color desiredColor)
-    {
-        GetComponentInChildren<SkinnedMeshRenderer>().materials[1].color = desiredColor;
-
-        var textMesh = GetComponentInChildren<TextMeshPro>();
-
-        textMesh.text = desiredName[0].ToString().ToUpper();
-        textMesh.color = desiredColor;
-    }
-
     public override void FixedUpdateNetwork() 
     {
-        if (RunnerManager.instance.roundState != RunnerManager.RoundState.Started) return;
+        //if (RoundManager.Instance.State != RoundManager.RoundState.Started) return;
         if (!stunTimer.ExpiredOrNotRunning(Runner)) return;
         if (!GetInput(out NetworkInputData inputData)) return;
 

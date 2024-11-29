@@ -13,6 +13,8 @@ public class RoundManager : NetworkBehaviour
     [Space]
     [SerializeField] UnityEvent onRoundStarted, onRoundEnded;
 
+    [Networked] public RoundState State { get; set; }
+
     private void Awake() 
     {
         Instance = this;
@@ -35,5 +37,12 @@ public class RoundManager : NetworkBehaviour
     public void RPC_OnRoundStart()
     {
         onRoundStarted.Invoke();
+    }
+
+    public enum RoundState
+    {
+        NotStarted,
+        Started,
+        Ended
     }
 }

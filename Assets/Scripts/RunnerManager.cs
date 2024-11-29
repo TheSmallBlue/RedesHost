@@ -19,16 +19,7 @@ public class RunnerManager : MonoBehaviour, INetworkRunnerCallbacks
     [Space]
     public UnityEvent onShutdown;
 
-    [Networked] public RoundState roundState {get; set;}
-
     [HideInInspector] public NetworkRunner Runner;
-
-    public enum RoundState
-    {
-        NotStarted,
-        Started,
-        Ended
-    }
 
     private void Awake() 
     {
@@ -82,7 +73,7 @@ public class RunnerManager : MonoBehaviour, INetworkRunnerCallbacks
     { 
         if(runner.IsServer)
         {
-            var headObject = runner.Spawn(_playerHead);
+            var headObject = runner.Spawn(_playerHead, inputAuthority: player);
             var head = headObject.GetComponent<PlayerHead>();
             head.Color = UnityEngine.Random.ColorHSV(0f, 1f, 0f, 1f, 0f, 1f, 1f, 1f);
             head.Name = NameGenerator.GetName();

@@ -2853,6 +2853,7 @@ MonoBehaviour:
   onRoundEnded:
     m_PersistentCalls:
       m_Calls: []
+  _State: 0
 --- !u!4 &667419569
 Transform:
   m_ObjectHideFlags: 0
