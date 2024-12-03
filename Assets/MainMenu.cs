@@ -4,6 +4,7 @@ using System.Linq;
 using Fusion;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 public class MainMenu : MonoBehaviour
 {
@@ -12,7 +13,11 @@ public class MainMenu : MonoBehaviour
     [SerializeField] RunnerManager runnerPrefab;
 
     [Space]
-    [SerializeField] GameObject modeScreen, connectingScreen, lobbyScreen;
+    [SerializeField] GameObject modeScreen;
+    [SerializeField] GameObject connectingScreen, lobbyScreen;
+
+    [Space]
+    [SerializeField] Button startButton;
 
     [Space]
     [SerializeField] Transform playerListParent;
@@ -93,6 +98,14 @@ public class MainMenu : MonoBehaviour
 
     public void UpdatePlayerList(IEnumerable<PlayerRef> players)
     {
+        if(players.Count() >= 2 && RunnerManager.instance.Runner.IsServer)
+        {
+            startButton.gameObject.SetActive(true);
+        } else 
+        {
+            startButton.gameObject.SetActive(false);
+        }
+
         for (int i = 0; i < playerListParent.childCount; i++)
         {
             Destroy(playerListParent.GetChild(i).gameObject);
