@@ -196,7 +196,7 @@ RectTransform:
   m_LocalScale: {x: 0.001, y: 0.001, z: 0.001}
   m_ConstrainProportionsScale: 1
   m_Children: []
-  m_Father: {fileID: 5269237258936641013}
+  m_Father: {fileID: 3015305388478795460}
   m_LocalEulerAnglesHint: {x: 30, y: -180, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -392,7 +392,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
-    - targetCorrespondingSourceObject: {fileID: 7454066948797566170, guid: 84a4234ec77cf2a468b358ad6a1afb20, type: 3}
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 84a4234ec77cf2a468b358ad6a1afb20, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6729224578171304110}
     m_AddedComponents:
@@ -446,14 +446,9 @@ MonoBehaviour:
   ApplyTiming: 2
   SyncSettings: 79
   StateHashes: 00000000757e3546b70cf4e4b80981d5566b49a0df27e558a22bda93464cab6265fca8c445ff3c19664f3fbf2bceb151087eb2f7aecce3ced672ebaf
-  TriggerHashes: 0000000028a98107190dc230
+  TriggerHashes: 00000000
 --- !u!4 &3015305388478795460 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 84a4234ec77cf2a468b358ad6a1afb20, type: 3}
-  m_PrefabInstance: {fileID: 3337797597835618607}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &5269237258936641013 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 7454066948797566170, guid: 84a4234ec77cf2a468b358ad6a1afb20, type: 3}
   m_PrefabInstance: {fileID: 3337797597835618607}
   m_PrefabAsset: {fileID: 0}

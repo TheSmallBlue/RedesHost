@@ -90,6 +90,8 @@ public class PlayerController : NetworkBehaviour, IAttackable
 
         RPC_SetAnim(PlayerButtons.Crouch, inputData.buttons.IsSet(PlayerButtons.Crouch));
         RPC_SetAnim(PlayerButtons.Jump, inputData.buttons.IsSet(PlayerButtons.Jump));
+        RPC_SetAnim(PlayerButtons.Attack, pressedButtons.IsSet(PlayerButtons.Attack));
+        RPC_SetAnim(PlayerButtons.Dash, pressedButtons.IsSet(PlayerButtons.Dash));
 
         Vector3 fwd = GetForward(inputData);
 
@@ -238,6 +240,12 @@ public class PlayerController : NetworkBehaviour, IAttackable
                 break;
             case PlayerButtons.Crouch:
                 _anim.SetBool("Crouching", value);
+                break;
+            case PlayerButtons.Attack:
+                _anim.SetBool("Punching", value);
+                break;
+            case PlayerButtons.Dash:
+                _anim.SetBool("Dashing", value);
                 break;
         }
     }
