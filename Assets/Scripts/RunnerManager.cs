@@ -17,6 +17,7 @@ public class RunnerManager : MonoBehaviour, INetworkRunnerCallbacks
     [SerializeField] NetworkPrefabRef _playerHead;
 
     [Space]
+    public UnityEvent<IEnumerable<PlayerRef>> onPlayerJoined;
     public UnityEvent onShutdown;
 
     [HideInInspector] public NetworkRunner Runner;
@@ -70,7 +71,7 @@ public class RunnerManager : MonoBehaviour, INetworkRunnerCallbacks
     }
 
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player) 
-    { 
+    {
         if(runner.IsServer)
         {
             var headObject = runner.Spawn(_playerHead, inputAuthority: player);
@@ -80,17 +81,19 @@ public class RunnerManager : MonoBehaviour, INetworkRunnerCallbacks
 
             runner.SetPlayerObject(player, headObject);
         }
+
+        onPlayerJoined.Invoke(runner.ActivePlayers);
     }
 
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player) 
     {
-        /* 
-        if(playerObjects.TryGetValue(player, out PlayerData playerToDespawn))
-        {
-            runner.Despawn(playerToDespawn.ownedObject);
-            playerObjects.Remove(player);
-        }
-        */
+        if(!runner.IsServer) return;
+
+        var playerObject = runner.GetPlayerObject(player);
+        var controlledObject = playerObject.GetComponent<PlayerHead>().ControlledObject;
+
+        runner.Despawn(controlledObject);
+        runner.Despawn(playerObject);
     }
 
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)

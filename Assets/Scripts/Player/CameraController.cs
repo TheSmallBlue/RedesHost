@@ -17,19 +17,23 @@ public class CameraController : MonoBehaviour
     [SerializeField] LayerMask wallMask;
 
     Vector2 _movement;
-
     Vector2 _input;
+    bool collision;
 
     private void OnEnable() 
     {
         Cursor.lockState = CursorLockMode.Locked;
         transform.position = _target.position;
         _movement = transform.localRotation.eulerAngles;
+
+        GetComponent<Animator>().enabled = false;
     }
 
     private void OnDisable() 
     {
         Cursor.lockState = CursorLockMode.None;
+
+        GetComponent<Animator>().enabled = true;
     }
 
     void Update()
@@ -62,7 +66,7 @@ public class CameraController : MonoBehaviour
     {
         Vector3 vel = _target.position - transform.position;
 
-        if(Physics.Raycast(_target.position, -transform.forward, out RaycastHit hitInfo, 10f, wallMask))
+        if(collision && Physics.Raycast(_target.position, -transform.forward, out RaycastHit hitInfo, 10f, wallMask))
         {
             transform.GetChild(0).localPosition = new Vector3(0f, 0f, -Vector3.Distance(transform.position, hitInfo.point));
         } else 
@@ -80,9 +84,10 @@ public class CameraController : MonoBehaviour
         transform.position = smoothedMovement;
     }
 
-    public CameraController SetTarget(Transform newTarget)
+    public CameraController SetTarget(Transform newTarget, bool collision = true)
     {
         _target = newTarget;
+        this.collision = collision;
 
         transform.position = _target.position;
 

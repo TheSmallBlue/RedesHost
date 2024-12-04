@@ -5,22 +5,25 @@ using Fusion;
 
 public class PlayerHead : NetworkBehaviour
 {
-    public PlayerController alivePlayerPrefab;
+    public PlayerAvatar alivePlayerPrefab, deadPlayerPrefab;
 
     [Networked] public NetworkObject ControlledObject {get; set; }
     [Networked] public Color Color { get; set; }
     [Networked] public string Name { get; set; }
 
-    public void SpawnAliveAvatar()
+    public PlayerAvatar SpawnAvatar(Vector3 position, Quaternion rotation, bool alive)
     {
-        ControlledObject = Runner.Spawn(alivePlayerPrefab, inputAuthority: Object.InputAuthority).Object;
+        var avatar = Runner.Spawn(alive ? alivePlayerPrefab : deadPlayerPrefab, position, inputAuthority: Object.InputAuthority);
+        ControlledObject = avatar.Initialize(this);
 
         RPC_ConfigureAvatar();
+
+        return avatar;
     }
 
     [Rpc]
     public void RPC_ConfigureAvatar()
     {
-        ControlledObject.GetComponent<PlayerController>().SetupVisuals(Name, Color);
+        ControlledObject.GetComponent<PlayerAvatar>().SetupVisuals(Name, Color);
     }
 }

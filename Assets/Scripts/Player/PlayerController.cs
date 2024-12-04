@@ -6,7 +6,7 @@ using Fusion.Addons.Physics;
 using TMPro;
 using UnityEngine;
 
-public class PlayerController : NetworkBehaviour, IAttackable
+public class PlayerController : PlayerAvatar, IAttackable
 {
     [SerializeField] float _topSpeed, _acceleration, _decceleration;
 
@@ -39,12 +39,10 @@ public class PlayerController : NetworkBehaviour, IAttackable
         if(!HasInputAuthority) return;
 
         var cameraRoot = Camera.main.transform.root;
-
-        cameraRoot.GetComponent<Animator>().enabled = false;
         cameraRoot.GetComponent<CameraController>().SetTarget(transform).enabled = true;
     }
 
-    public void SetupVisuals(string desiredName, Color desiredColor)
+    public override void SetupVisuals(string desiredName, Color desiredColor)
     {
         GetComponentInChildren<SkinnedMeshRenderer>().materials[1].color = desiredColor;
 
@@ -59,8 +57,6 @@ public class PlayerController : NetworkBehaviour, IAttackable
         if(!HasInputAuthority) return;
 
         var cameraRoot = Camera.main.transform.root;
-
-        cameraRoot.GetComponent<Animator>().enabled = true;
         cameraRoot.GetComponent<CameraController>().enabled = false;
     }
 
@@ -247,10 +243,7 @@ public class PlayerController : NetworkBehaviour, IAttackable
 
     public void Die()
     {
-        //BasicSpawner.instance.RespawnIn(Object.InputAuthority, 5f);
-
-        //gameObject.SetActive(false);
-        Runner.Despawn(Object);
+        RoundManager.Instance.RPC_OnPlayerDead(this);
     }
 
     int lastAttackIndex = 0;

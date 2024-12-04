@@ -46,6 +46,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   alivePlayerPrefab: {fileID: 6660016424339470147, guid: 1cdba26367acc17488c2313e1cc2dfe4, type: 3}
+  deadPlayerPrefab: {fileID: 7590024366826775880, guid: 7922e648923ab6f4fbd9125214ca7376, type: 3}
   _ControlledObject: {fileID: 0}
   _Color: {r: 0, g: 0, b: 0, a: 0}
   _Name: 
