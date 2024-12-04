@@ -191,16 +191,16 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6350837743652800792}
-  m_LocalRotation: {x: 0.00000006158383, y: -0.96592593, z: 0.25881866, w: 0.00000021619964}
-  m_LocalPosition: {x: 0, y: 0, z: 0.00692}
-  m_LocalScale: {x: 0.001, y: 0.001, z: 0.001}
+  m_LocalRotation: {x: 0.000000061583826, y: -0.965926, z: 0.25881875, w: 0.00000021619965}
+  m_LocalPosition: {x: 0, y: 0, z: 0.32159996}
+  m_LocalScale: {x: 0.05, y: 0.05, z: 0.05}
   m_ConstrainProportionsScale: 1
   m_Children: []
-  m_Father: {fileID: 3015305388478795460}
+  m_Father: {fileID: 3048994629645205589}
   m_LocalEulerAnglesHint: {x: 30, y: -180, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.00004, y: 0.01874}
+  m_AnchoredPosition: {x: 0.00004, y: 0.86196876}
   m_SizeDelta: {x: 20, y: 5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &2197588476809110669
@@ -298,7 +298,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
@@ -392,7 +392,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
-    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 84a4234ec77cf2a468b358ad6a1afb20, type: 3}
+    - targetCorrespondingSourceObject: {fileID: -8934568484277884550, guid: 84a4234ec77cf2a468b358ad6a1afb20, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6729224578171304110}
     m_AddedComponents:
@@ -442,13 +442,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Animator: {fileID: 7258979161189672265}
-  TotalWords: 2
+  TotalWords: 4
   ApplyTiming: 2
-  SyncSettings: 79
-  StateHashes: 00000000757e3546b70cf4e4b80981d5566b49a0df27e558a22bda93464cab6265fca8c445ff3c19664f3fbf2bceb151087eb2f7aecce3ced672ebaf
+  SyncSettings: 111
+  StateHashes: 00000000757e3546b70cf4e4b80981d5566b49a0df27e558a22bda93464cab6265fca8c445ff3c19664f3fbf2bceb151087eb2f7aecce3ced672ebafc640d7352d835fc893908b1836d46ca75f26df457c96dce38b2c8f16a89c8cb0c01206a9d854f7383e725c3b70fd76ae5c5f20eda674d87e3a39fe3a
   TriggerHashes: 00000000
 --- !u!4 &3015305388478795460 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 84a4234ec77cf2a468b358ad6a1afb20, type: 3}
+  m_PrefabInstance: {fileID: 3337797597835618607}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &3048994629645205589 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8934568484277884550, guid: 84a4234ec77cf2a468b358ad6a1afb20, type: 3}
   m_PrefabInstance: {fileID: 3337797597835618607}
   m_PrefabAsset: {fileID: 0}

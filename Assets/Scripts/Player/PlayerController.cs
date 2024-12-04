@@ -36,6 +36,8 @@ public class PlayerController : NetworkBehaviour, IAttackable
 
     public override void Spawned()
     {
+        if(!HasInputAuthority) return;
+
         var cameraRoot = Camera.main.transform.root;
 
         cameraRoot.GetComponent<Animator>().enabled = false;
@@ -54,53 +56,70 @@ public class PlayerController : NetworkBehaviour, IAttackable
 
     public override void Despawned(NetworkRunner runner, bool hasState)
     {
+        if(!HasInputAuthority) return;
+        
         var cameraRoot = Camera.main.transform.root;
 
         cameraRoot.GetComponent<Animator>().enabled = true;
         cameraRoot.GetComponent<CameraController>().enabled = false;
     }
 
-    private void Update() 
-    {
-        if(!HasInputAuthority) return;
-        
-        _anim.SetFloat("Speed", _rb.velocity.CollapseAxis(1).magnitude);
-
-        _anim.SetBool("Grounded", _grounded.isGrounded);
-        _anim.SetBool("Falling", _rb.velocity.y < -0.1f);
-    }
-
     public override void FixedUpdateNetwork() 
     {
-        //if (RoundManager.Instance.State != RoundManager.RoundState.Started) return;
-        if (!stunTimer.ExpiredOrNotRunning(Runner)) return;
-        if (!GetInput(out NetworkInputData inputData)) return;
+        if (!stunTimer.ExpiredOrNotRunning(Runner)) // If we're stunned, do nothing except updating our animator
+        {
+            if(Runner.IsForward)
+            {
+                _anim.SetBool("Stunned", true);
+            }
 
-        var pressedButtons = inputData.buttons.GetPressed(ButtonsPrevious);
-        var releasedButtons = inputData.buttons.GetReleased(ButtonsPrevious);
+            return;
+        }
+        if (!GetInput(out NetworkInputData inputData)) return; // If there is no input for us, do nothing
 
+        var pressedButtons = inputData.buttons.GetPressed(ButtonsPrevious); // Get buttons pressed this update
+        var releasedButtons = inputData.buttons.GetReleased(ButtonsPrevious); // Get buttons released this update
+
+        // Do actions if certain buttons are pressed
         if(pressedButtons.IsSet(PlayerButtons.Jump)) Jump(inputData);
         if(pressedButtons.IsSet(PlayerButtons.Crouch)) Crouch(inputData);
         if(pressedButtons.IsSet(PlayerButtons.Dash)) Dash(inputData);
         if(pressedButtons.IsSet(PlayerButtons.Attack)) Attack(inputData);
 
+        // Do other actions if certain buttons are released
         if(releasedButtons.IsSet(PlayerButtons.Jump)) UnJump(inputData);
 
+        // Set our ButtonsPrevious variables so that we may be able to check which buttons have been newly pressed next update
         ButtonsPrevious = inputData.buttons;
 
-        RPC_SetAnim(PlayerButtons.Crouch, inputData.buttons.IsSet(PlayerButtons.Crouch));
-        RPC_SetAnim(PlayerButtons.Jump, inputData.buttons.IsSet(PlayerButtons.Jump));
-        RPC_SetAnim(PlayerButtons.Attack, pressedButtons.IsSet(PlayerButtons.Attack));
-        RPC_SetAnim(PlayerButtons.Dash, pressedButtons.IsSet(PlayerButtons.Dash));
+        // Update our animator
+        if (Runner.IsForward)
+        {
+            _anim.SetFloat("Speed", _rb.velocity.CollapseAxis(1).magnitude);
 
-        Vector3 fwd = GetForward(inputData);
+            _anim.SetBool("Grounded", _grounded.isGrounded);
+            _anim.SetBool("Falling", _rb.velocity.y < -0.1f);
 
+            _anim.SetBool("Jumping", inputData.buttons.IsSet(PlayerButtons.Jump));
+            _anim.SetBool("Crouching", inputData.buttons.IsSet(PlayerButtons.Crouch));
+            _anim.SetBool("Punching", pressedButtons.IsSet(PlayerButtons.Attack));
+            _anim.SetBool("Dashing", pressedButtons.IsSet(PlayerButtons.Dash));
+
+            _anim.SetBool("Stunned", false);
+        }
+
+
+        // If we're punching, look towards where we're punching.
         if (inputData.buttons.IsSet(PlayerButtons.Attack)) transform.forward = inputData.cameraForward.CollapseAxis(1);
 
+        // Move towards camera forward
+        Vector3 fwd = GetForward(inputData);
         Move(fwd, inputData);
 
+        // We're falling! Let's check if we are stomping on a head
         if(_rb.velocity.y < -0.1f) StompHeads();
 
+        // We've fallen out of bounds! Lets just die.
         if(transform.position.y < -10f) Die();
     }
 
@@ -155,6 +174,7 @@ public class PlayerController : NetworkBehaviour, IAttackable
 
     void Attack(NetworkInputData input)
     {
+        // Only run on server
         if (!HasStateAuthority) return;
 
         var playersHit = Physics.OverlapSphere(transform.position + input.cameraForward * _attackReach, _attackSize, 1 << 6);
@@ -224,13 +244,7 @@ public class PlayerController : NetworkBehaviour, IAttackable
         Runner.Despawn(Object);
     }
 
-    [Rpc(RpcSources.StateAuthority, RpcTargets.InputAuthority, HostMode = RpcHostMode.SourceIsServer)]
-    public void RPC_ShowWinUI(PlayerRef winningPlayer)
-    {
-        GameUI.instance.ShowRoundEnd(winningPlayer == Object.InputAuthority);
-    }
-
-    [Rpc(RpcSources.StateAuthority, RpcTargets.All, HostMode = RpcHostMode.SourceIsServer)]
+    [Rpc(RpcSources.All, RpcTargets.InputAuthority)]
     public void RPC_SetAnim(PlayerButtons action, bool value)
     {
         switch (action)
