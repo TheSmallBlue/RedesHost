@@ -13,7 +13,7 @@ public class GroundedCheck : MonoBehaviour
 
     public event Action<bool, RaycastHit> onGroundedStateChanged;
 
-    void Update()
+    void FixedUpdate()
     {
         wasGrounded = isGrounded;
 

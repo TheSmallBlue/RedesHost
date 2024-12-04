@@ -28,8 +28,9 @@ public class PlayerController : PlayerAvatar, IAttackable
     [SerializeField] Pancake pancakePrefab;
 
     Rigidbody _rb;
-    GroundedCheck _grounded;
     Animator _anim;
+
+    bool _grounded;
 
     [Networked] public NetworkButtons ButtonsPrevious { get; set; }
     [Networked] private TickTimer stunTimer { get; set; }
@@ -37,7 +38,6 @@ public class PlayerController : PlayerAvatar, IAttackable
     private void Awake() 
     {
         _rb = GetComponent<Rigidbody>();
-        _grounded = GetComponent<GroundedCheck>();
         _anim = GetComponentInChildren<Animator>();
     }
 
@@ -74,7 +74,7 @@ public class PlayerController : PlayerAvatar, IAttackable
         {
             _anim.SetFloat("Speed", _rb.velocity.CollapseAxis(1).magnitude);
 
-            _anim.SetBool("Grounded", _grounded.isGrounded);
+            _anim.SetBool("Grounded", _grounded);
             _anim.SetBool("Falling", _rb.velocity.y < -0.1f);
         }
 
@@ -90,6 +90,8 @@ public class PlayerController : PlayerAvatar, IAttackable
             return;
         }
         if (!GetInput(out NetworkInputData inputData)) return; // If there is no input for us, do nothing
+
+        _grounded = Physics.Raycast(transform.position, -Vector3.up, out RaycastHit info, 1.3f, ~(1 << 6));
 
         var pressedButtons = inputData.buttons.GetPressed(ButtonsPrevious); // Get buttons pressed this update
         var releasedButtons = inputData.buttons.GetReleased(ButtonsPrevious); // Get buttons released this update
@@ -154,7 +156,7 @@ public class PlayerController : PlayerAvatar, IAttackable
 
     void Jump(NetworkInputData input)
     {
-        if(!_grounded.isGrounded) return;
+        if(!_grounded) return;
 
         _rb.velocity = new Vector3(_rb.velocity.x, input.buttons.IsSet(PlayerButtons.Crouch) ? _jumpForce * 1.5f : _jumpForce, _rb.velocity.z);
     }
@@ -168,7 +170,7 @@ public class PlayerController : PlayerAvatar, IAttackable
 
     void Crouch(NetworkInputData input)
     {
-        if(!_grounded.isGrounded)
+        if(!_grounded)
         {
             _rb.velocity = -transform.up * _groundpoundForce;
         }

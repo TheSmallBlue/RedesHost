@@ -106,17 +106,6 @@ public class RunnerManager : MonoBehaviour, INetworkRunnerCallbacks
 
     #region Input
 
-    bool _jump, _dash, _crouch, _attack;
-
-    private void Update() 
-    {
-        // Input
-        _jump = _jump | Input.GetKey(KeyCode.Space);
-        _dash = _dash | Input.GetKey(KeyCode.LeftShift);
-        _crouch = _crouch | Input.GetKey(KeyCode.LeftControl);
-        _attack = _attack | Input.GetMouseButton(0);
-    }
-
     #endregion
 
     public void OnInput(NetworkRunner runner, NetworkInput input) 
@@ -128,16 +117,11 @@ public class RunnerManager : MonoBehaviour, INetworkRunnerCallbacks
         data.cameraForward = Camera.main.transform.forward;
         data.cameraRight = Camera.main.transform.right;
 
-        data.buttons.Set(PlayerButtons.Jump, _jump);
-        data.buttons.Set(PlayerButtons.Crouch, _crouch);
-        data.buttons.Set(PlayerButtons.Dash, _dash);
+        data.buttons.Set(PlayerButtons.Jump, Input.GetKey(KeyCode.Space));
+        data.buttons.Set(PlayerButtons.Crouch, Input.GetKey(KeyCode.LeftControl));
+        data.buttons.Set(PlayerButtons.Dash, Input.GetKey(KeyCode.LeftShift));
 
-        data.buttons.Set(PlayerButtons.Attack, _attack);
-
-        _jump = false;
-        _crouch = false;
-        _dash = false;
-        _attack = false;
+        data.buttons.Set(PlayerButtons.Attack, Input.GetMouseButton(0));
 
         input.Set(data);
     }
