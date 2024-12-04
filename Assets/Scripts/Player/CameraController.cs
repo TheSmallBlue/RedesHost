@@ -6,10 +6,15 @@ public class CameraController : MonoBehaviour
 {
     [SerializeField] Transform _target;
 
+    [Space]
     [SerializeField] Vector2 _yRotationLimits;
     [SerializeField] float _sensitivity = 300, _distance, _yDampening, _xzDampening;
 
+    [Space]
     [SerializeField] bool _flipXAxis, _flipYAxis;
+
+    [Space]
+    [SerializeField] LayerMask wallMask;
 
     Vector2 _movement;
 
@@ -56,6 +61,14 @@ public class CameraController : MonoBehaviour
     void SetPosition()
     {
         Vector3 vel = _target.position - transform.position;
+
+        if(Physics.Raycast(_target.position, -transform.forward, out RaycastHit hitInfo, 10f, wallMask))
+        {
+            transform.GetChild(0).localPosition = new Vector3(0f, 0f, -Vector3.Distance(transform.position, hitInfo.point));
+        } else 
+        {
+            transform.GetChild(0).localPosition = new Vector3(0f, 0f, -10f);
+        }
 
         Vector3 smoothedMovement = transform.position;
 

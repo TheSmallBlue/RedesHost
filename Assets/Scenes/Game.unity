@@ -8048,6 +8048,9 @@ MonoBehaviour:
   _xzDampening: 10
   _flipXAxis: 0
   _flipYAxis: 0
+  wallMask:
+    serializedVersion: 2
+    m_Bits: 1
 --- !u!95 &1451834954
 Animator:
   serializedVersion: 5
