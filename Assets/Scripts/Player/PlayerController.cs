@@ -8,17 +8,24 @@ using UnityEngine;
 
 public class PlayerController : PlayerAvatar, IAttackable
 {
-    [SerializeField] float _topSpeed, _acceleration, _decceleration;
+    [Space]
+    [SerializeField] float _topSpeed;
+    [SerializeField] float _acceleration, _decceleration;
 
     [Space]
-    [SerializeField] float _jumpForce, _groundpoundForce, _dashForce;
+    [SerializeField] float _jumpForce;
+    [SerializeField] float _groundpoundForce, _dashForce;
 
     [Space]
-    [SerializeField] float _attackReach, _attackSize;
+    [SerializeField] float _attackReach;
+    [SerializeField] float _attackSize;
     [SerializeField] float _knockbackAmount;
 
     [Space]
     [SerializeField] float _stunTime;
+
+    [Space]
+    [SerializeField] Pancake pancakePrefab;
 
     Rigidbody _rb;
     GroundedCheck _grounded;
@@ -233,8 +240,6 @@ public class PlayerController : PlayerAvatar, IAttackable
             var headAsPlayer = head.GetComponent<PlayerController>();
             if (head.GetComponent<PlayerController>() == this) continue;
 
-            //BasicSpawner.instance.AddPoints(Object.InputAuthority, 1);
-
             _rb.velocity = new Vector3(_rb.velocity.x, _jumpForce, _rb.velocity.z);
 
             headAsPlayer.Die();
@@ -243,7 +248,14 @@ public class PlayerController : PlayerAvatar, IAttackable
 
     public void Die()
     {
+        RPC_SpawnPancake();
         RoundManager.Instance.RPC_OnPlayerDead(this);
+    }
+
+    [Rpc]
+    public void RPC_SpawnPancake()
+    {
+        Instantiate(pancakePrefab, transform.position, Quaternion.identity).Initialize(Head.Color);
     }
 
     int lastAttackIndex = 0;

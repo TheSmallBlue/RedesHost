@@ -17,7 +17,8 @@ public class RunnerManager : MonoBehaviour, INetworkRunnerCallbacks
     [SerializeField] NetworkPrefabRef _playerHead;
 
     [Space]
-    public UnityEvent<IEnumerable<PlayerRef>> onPlayerJoined;
+    public UnityEvent<PlayerRef> onPlayerJoined;
+    public UnityEvent onPlayerLeft;
     public UnityEvent onShutdown;
 
     [HideInInspector] public NetworkRunner Runner;
@@ -82,11 +83,11 @@ public class RunnerManager : MonoBehaviour, INetworkRunnerCallbacks
             runner.SetPlayerObject(player, headObject);
         }
 
-        onPlayerJoined.Invoke(runner.ActivePlayers);
+        onPlayerJoined.Invoke(player);
     }
 
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player) 
-    {
+    {   
         if(!runner.IsServer) return;
 
         var playerObject = runner.GetPlayerObject(player);
@@ -94,6 +95,8 @@ public class RunnerManager : MonoBehaviour, INetworkRunnerCallbacks
 
         runner.Despawn(controlledObject);
         runner.Despawn(playerObject);
+
+        onPlayerLeft.Invoke();
     }
 
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
