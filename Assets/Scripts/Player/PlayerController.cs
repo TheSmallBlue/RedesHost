@@ -57,7 +57,7 @@ public class PlayerController : NetworkBehaviour, IAttackable
     public override void Despawned(NetworkRunner runner, bool hasState)
     {
         if(!HasInputAuthority) return;
-        
+
         var cameraRoot = Camera.main.transform.root;
 
         cameraRoot.GetComponent<Animator>().enabled = true;
@@ -66,10 +66,21 @@ public class PlayerController : NetworkBehaviour, IAttackable
 
     public override void FixedUpdateNetwork() 
     {
+        // Update our constantly-updating animations
+        if(Runner.IsForward)
+        {
+            _anim.SetFloat("Speed", _rb.velocity.CollapseAxis(1).magnitude);
+
+            _anim.SetBool("Grounded", _grounded.isGrounded);
+            _anim.SetBool("Falling", _rb.velocity.y < -0.1f);
+        }
+
         if (!stunTimer.ExpiredOrNotRunning(Runner)) // If we're stunned, do nothing except updating our animator
         {
+            // Update our damage animations
             if(Runner.IsForward)
             {
+                _anim.SetInteger("Damaged", lastAttackIndex);
                 _anim.SetBool("Stunned", true);
             }
 
@@ -92,14 +103,9 @@ public class PlayerController : NetworkBehaviour, IAttackable
         // Set our ButtonsPrevious variables so that we may be able to check which buttons have been newly pressed next update
         ButtonsPrevious = inputData.buttons;
 
-        // Update our animator
+        // Update our action animations
         if (Runner.IsForward)
         {
-            _anim.SetFloat("Speed", _rb.velocity.CollapseAxis(1).magnitude);
-
-            _anim.SetBool("Grounded", _grounded.isGrounded);
-            _anim.SetBool("Falling", _rb.velocity.y < -0.1f);
-
             _anim.SetBool("Jumping", inputData.buttons.IsSet(PlayerButtons.Jump));
             _anim.SetBool("Crouching", inputData.buttons.IsSet(PlayerButtons.Crouch));
             _anim.SetBool("Punching", pressedButtons.IsSet(PlayerButtons.Attack));
@@ -202,12 +208,15 @@ public class PlayerController : NetworkBehaviour, IAttackable
             case IAttackable.AttackType.Forward:
                 newVel = -(source.position - transform.position).normalized * _knockbackAmount;
                 newVel.y = _rb.velocity.y;
+                RPC_SetLastAttackIndex(1);
                 break;
             case IAttackable.AttackType.Up:
                 newVel = Vector3.up * _jumpForce;
+                RPC_SetLastAttackIndex(2);
                 break;
             case IAttackable.AttackType.Down:
                 newVel = -Vector3.up * _groundpoundForce * 1.5f;
+                RPC_SetLastAttackIndex(3);
                 break;
         }
 
@@ -244,23 +253,10 @@ public class PlayerController : NetworkBehaviour, IAttackable
         Runner.Despawn(Object);
     }
 
-    [Rpc(RpcSources.All, RpcTargets.InputAuthority)]
-    public void RPC_SetAnim(PlayerButtons action, bool value)
+    int lastAttackIndex = 0;
+    [Rpc]
+    public void RPC_SetLastAttackIndex(int index)
     {
-        switch (action)
-        {
-            case PlayerButtons.Jump:
-                _anim.SetBool("Jumping", value);
-                break;
-            case PlayerButtons.Crouch:
-                _anim.SetBool("Crouching", value);
-                break;
-            case PlayerButtons.Attack:
-                _anim.SetBool("Punching", value);
-                break;
-            case PlayerButtons.Dash:
-                _anim.SetBool("Dashing", value);
-                break;
-        }
+        lastAttackIndex = index;
     }
 }
