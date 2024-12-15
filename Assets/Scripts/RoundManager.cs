@@ -147,6 +147,11 @@ public class RoundManager : NetworkBehaviour
     [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
     public void RPC_OnPlayerDisconnected()
     {
+        Invoke("UpdateAlivePlayers", 0.1f);
+    }
+
+    void UpdateAlivePlayers()
+    {
         var playersNotNull = alivePlayers.Where(x => x != null);
         alivePlayers = playersNotNull.ToList();
     }

@@ -69,8 +69,11 @@ public class PlayerController : PlayerAvatar, IAttackable
 
     public override void FixedUpdateNetwork() 
     {
+        // Update grounded state first, since a lot of our animations depend on this
+        _grounded = Physics.Raycast(transform.position, -Vector3.up, out RaycastHit info, 1.3f, ~(1 << 6));
+
         // Update our constantly-updating animations
-        if(Runner.IsForward)
+        if (Runner.IsForward)
         {
             _anim.SetFloat("Speed", _rb.velocity.CollapseAxis(1).magnitude);
 
@@ -90,8 +93,6 @@ public class PlayerController : PlayerAvatar, IAttackable
             return;
         }
         if (!GetInput(out NetworkInputData inputData)) return; // If there is no input for us, do nothing
-
-        _grounded = Physics.Raycast(transform.position, -Vector3.up, out RaycastHit info, 1.3f, ~(1 << 6));
 
         var pressedButtons = inputData.buttons.GetPressed(ButtonsPrevious); // Get buttons pressed this update
         var releasedButtons = inputData.buttons.GetReleased(ButtonsPrevious); // Get buttons released this update
